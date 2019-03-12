@@ -95,9 +95,9 @@ function fixdata(data) { //文件流转BinaryString
 
 // echarts构建
 function createChart () {
-    let myChart = echarts.init(document.getElementById('main'));
+    let lineChart = echarts.init(document.getElementById('line'));
 
-    let option = {
+    let lineOption = {
         title: {text: wb.SheetNames[0]},
         xAxis: xData,
         yAxis: {
@@ -107,14 +107,32 @@ function createChart () {
         legend: {
             data: legend
         }
-    }
+    };
+    // 折线图赋值
+    lineChart.setOption(lineOption);
 
-    myChart.setOption(option);
+    // 柱状图初始化
+    let barChart = echarts.init(document.getElementById('bar'));
+    let barOption = JSON.parse(JSON.stringify(lineOption));
+    barOption.series = changeType(barOption.series, 'bar');
+    barChart.setOption(barOption);
+
+    // 散点图初始化
+    let scatterChart = echarts.init(document.getElementById('scatter'));
+    let scatterOption = JSON.parse(JSON.stringify(lineOption));
+    scatterOption.series = changeType(scatterOption.series, 'scatter');
+    scatterChart.setOption(scatterOption);
+
 }
 
+function changeType(data, type){
+    return data.map(e => {
+        e.type = type;
+        return e;
+    });
+}
 
 function getData (obj) {
     importExcel(obj);
 };
 
-// 

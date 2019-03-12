@@ -1,0 +1,14 @@
+.visual{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  margin-left: 5%;
+  margin-top: 50px;
+  
+}
+.chart{
+  background: #ddd;
+  width: 30%;
+  height: 300px;
+}
