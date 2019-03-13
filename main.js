@@ -3,7 +3,8 @@ let rABS = false; //是否将文件读取为二进制字符串
 let data = [];  // 转为JSON的最终数据
 let xData = {
     data: [],
-    type: 'category'
+    type: 'category',
+    name: ''
 }; //  x轴数值
 let yData = []; //  y轴数值
 let legend = [];
@@ -49,7 +50,8 @@ function importExcel(obj) {//导入
         //wb.Sheets[Sheet名]获取第一个Sheet的数据
         document.getElementById("demo").innerHTML= JSON.stringify( XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]) );
         data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        console.log(data);
+        console.log(data[0]);
+        showTableData(data);
 
         // yData初始化
         let len = Object.keys(data[0]).length;
@@ -61,6 +63,7 @@ function importExcel(obj) {//导入
         // x & y 数值赋值
         data.forEach(e => {
             xData.data.push(get_obj_first_value(e));
+            xData.name = get_obj_first_key(e)
             delete e[get_obj_first_key(e)];
             for (let i = 0; Object.keys(e).length > 0; i++) {
                 yData[i].data.push(parseInt(get_obj_first_value(e)));
@@ -104,6 +107,7 @@ function createChart () {
             type: 'value'
         },
         series: yData,
+        tooltip: {},
         legend: {
             data: legend
         }
@@ -125,12 +129,33 @@ function createChart () {
 
 }
 
+function showTableData (info) {
+    console.log(info[0])
+    // 表头信息初始化
+    let headerInfo = '<tr>';
+    for (let i in info[0]) {
+        headerInfo += '<th>' + i + '</th>'
+    }
+    $('#dataTable').append(headerInfo + '</tr>');
+    let bodyInfo = '';
+    info.forEach(e => {
+        bodyInfo += '<tr>';
+        for (let i in e) {
+            bodyInfo += '<td>' + e[i] + '</td>';
+        }
+        bodyInfo += '</tr>'
+        
+    });
+    $('#dataTable').append(bodyInfo);
+}
+
 function changeType(data, type){
     return data.map(e => {
         e.type = type;
         return e;
     });
 }
+
 
 function getData (obj) {
     importExcel(obj);
