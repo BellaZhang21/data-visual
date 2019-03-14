@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.bootcss.com/echarts/4.2.0-rc.2/echarts-en.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <title>scatter</title>
+</head>
+<body>
+  <div class="part1">
+      <div id="main" style="width: 600px;height:400px;"></div>
+      <div>
+        <input type="number" id="size">
+        <button class="change-size">确认</button>
+        <button class="change-position">切换分布</button>
+      </div>
+      <div style="display: flex;">
+          <input type="text" id="color">
+          <button class="change-color">确认</button>
+          <button class="random-color">随机颜色</button>
+          <div class="color-text"></div>
+      </div>
+  </div>
+  <div class="part2">
+      <div id="main2" style="width: 600px;height:400px;"></div>
+  </div>
+</body>
+<script>
+  var myChart = echarts.init(document.getElementById('main'));
+  var myChart2 = echarts.init(document.getElementById('main2'));
+  let option = {
+      xAxis: {},
+      yAxis: {},
+      series: [{
+          symbolSize: 10,
+          data: [
+            [7.22, 2.5],
+            [6.44, 4.23],
+            [1.23, 9.35],
+            [2.36, 8.95],
+            [5.32, 4.12],
+            [8.97, 6.66],
+            [5.14, 7.95],
+            [1.03, 8.36],
+            [4.12, 4.21],
+
+          ],
+          type: 'scatter',
+          itemStyle: {
+            color: '#668301'
+          }
+      }]
+  };
+  myChart.setOption(option);
+
+  let data =[];
+  let num = 10;
+  let size = 10;
+
+  // 点大小设置
+  $('.change-size').click(function(){
+    size = $('#size').val();
+    option.series[0].symbolSize = size;
+    myChart.setOption(option);
+  })
+
+
+  // 点的随机分布
+  $('.change-position').click(function(){
+    while (num--) {
+      let innerNum = 2;
+      let innerData = [];
+      while (innerNum--) {
+        innerData.push((Math.random()*20).toFixed(2));
+      }
+      data.push(innerData);
+    }
+    option.series[0].data = data;
+    myChart.setOption(option);
+    myChart2.setOption(option);
+    // 清空
+    num = 10;
+    data = [];
+  });
+
+  // 指定颜色变换
+  $('.change-color').click(function() {
+    option.series[0].itemStyle.color = $('#color').val();
+    myChart.setOption(option);
+  });
+
+  // 颜色随机变换
+  $('.random-color').click(function () {
+    let randomColor = '#' + Math.floor(Math.random()*256*256*256).toString(16);
+    console.log(randomColor);
+    $('.color-text').text(randomColor);
+    option.series[0].itemStyle.color = randomColor;
+    myChart.setOption(option);
+  })
+
+  myChart2.setOption(option);
+  
+  
+
+</script>
+</html>
