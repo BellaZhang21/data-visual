@@ -7,11 +7,13 @@ let xData = {
     name: ''
 }; //  x轴数值
 let yData = []; //  y轴数值
+let scatterData = [];
 let legend = [];
+let rawColor = [];  //  初始配色
 
 function get_obj_first_value(data){
     for (var key in data)
-        return data[key];
+        return +data[key];
 }
 
 function get_obj_first_key(data){
@@ -50,9 +52,14 @@ function importExcel(obj) {//导入
         //wb.Sheets[Sheet名]获取第一个Sheet的数据
         document.getElementById("demo").innerHTML= JSON.stringify( XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]) );
         data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        console.log(data[0]);
         showTableData(data);
 
+        xData = {
+            data: [],
+            type: 'category',
+            name: ''
+        }; //  x轴数值;
+        yData = [];
         // yData初始化
         let len = Object.keys(data[0]).length;
         for (let i = 0; i < len - 1; i++) {
@@ -71,12 +78,18 @@ function importExcel(obj) {//导入
                 delete e[get_obj_first_key(e)];
             }
         });
-
+        console.log('xxxxxx', xData.data);
+        
+        scatterData = [];
+        for (let i = 0; i < xData.data.length; i++) {
+            scatterData.push([+xData.data[i], +yData[0].data[i]]);
+        }
+        chartType = 'scatter';
         // 获取y轴属性值
         legend = yData.map(e => e.name);
-        console.log(xData, yData, legend);
-
-        createChart();
+        $('.chart').removeClass('show');
+        $('#' + chartType).addClass('show');
+        createChart(chartType);
     };
     if(rABS) {
         reader.readAsArrayBuffer(f);
@@ -97,10 +110,9 @@ function fixdata(data) { //文件流转BinaryString
 
 
 // echarts构建
-function createChart () {
-    let lineChart = echarts.init(document.getElementById('line'));
+function createChart (type) {
 
-    let lineOption = {
+    let option = {
         title: {text: wb.SheetNames[0]},
         xAxis: xData,
         yAxis: {
@@ -111,25 +123,80 @@ function createChart () {
         legend: {
             data: legend
         }
-    };
-    // 折线图赋值
-    lineChart.setOption(lineOption);
+    }
+    if (type === 'line') {
+        let lineChart = echarts.init(document.getElementById('line'));
+        // 折线图赋值
+        lineChart.setOption(option);
+        rawColor = lineChart.getOption().color;
+    } else if (type === 'bar') {
+        let barChart = echarts.init(document.getElementById('bar'));
+        let barOption = JSON.parse(JSON.stringify(option));
+        barOption.series = changeType(barOption.series, 'bar');
+        barChart.setOption(barOption);
+        rawColor = barChart.getOption().color;
 
-    // 柱状图初始化
-    let barChart = echarts.init(document.getElementById('bar'));
-    let barOption = JSON.parse(JSON.stringify(lineOption));
-    barOption.series = changeType(barOption.series, 'bar');
-    barChart.setOption(barOption);
-
-    // 散点图初始化
-    let scatterChart = echarts.init(document.getElementById('scatter'));
-    let scatterOption = JSON.parse(JSON.stringify(lineOption));
-    scatterOption.series = changeType(scatterOption.series, 'scatter');
-    scatterChart.setOption(scatterOption);
-
+    } else if (type === 'scatter') {
+        // 散点图初始化
+        let scatterChart = echarts.init(document.getElementById('scatter'));
+        let scatterOption = JSON.parse(JSON.stringify(option));
+        scatterOption.series = changeType(scatterOption.series, 'scatter');
+        scatterOption.series[0].data = scatterData;
+        // 最小值界定
+        let yGroup = [], xGroup = [];
+        scatterData.forEach(e => {
+            xGroup.push(e[0]);
+            yGroup.push(e[1]);
+        });
+        xMin = eval("Math.min(" + xGroup.toString() + ")");
+        xMax = eval("Math.max(" + xGroup.toString() + ")");
+        yMin = eval("Math.min(" + yGroup.toString() + ")");
+        yMax = eval("Math.max(" + yGroup.toString() + ")");
+        scatterOption.xAxis = {
+            min: Math.floor(xMin - (xMax - xMin) * 0.1)
+        };
+        scatterOption.yAxis = {
+            min: Math.floor(yMin - (yMax - yMin) * 0.1)
+        };
+        console.log(scatterOption);
+        scatterChart.setOption(scatterOption);
+        rawColor = scatterChart.getOption().color;
+    }
+    // rgb颜色转hsl
+    rawColor = rawColor.map(e => {
+        e = e.replace('#', '');
+        return rgbToHsl(e);
+    });
+    console.log('raw', rawColor);
 }
 
+function rgbToHsl(rgb) {
+    let r = parseInt(rgb.substring(0, 2), 16) / 255;
+    let g = parseInt(rgb.substring(2, 4), 16) / 255;
+    let b = parseInt(rgb.substring(4, 6), 16) / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+
+    if (max == min){
+        h = s = 0; // achromatic
+    } else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+    h = 360 * (1-h);
+
+    return `hsl(${h.toFixed(2)},${s.toFixed(2)},${l.toFixed(2)})`
+}
+
+// 表格信息重现
 function showTableData (info) {
+    $('#dataTable').empty();
     console.log(info[0])
     // 表头信息初始化
     let headerInfo = '<tr>';
@@ -156,8 +223,47 @@ function changeType(data, type){
     });
 }
 
-
 function getData (obj) {
     importExcel(obj);
 };
 
+// 切换数据展示类型
+$('.btn').click(function (e) { 
+  $('.btn').removeClass('active');
+  $(this).addClass('active');
+  $('.chart').removeClass('show');
+  $('#' + $(this).attr('name')).addClass('show');
+  createChart($(this).attr('name'));
+});
+
+// 大小调整
+$('#ex1').slider({
+    formatter: function (value) {
+        return '大小: ' + value;
+    }
+}).on('change', function (e) {
+    //当值发生改变的时候触发
+    let chartInfo = echarts.init(document.getElementById('scatter'));
+    let option = chartInfo.getOption();
+    console.log(rawColor);
+    for (let i = 0; i < option.series.length; i++) {
+        option.series[i].symbolSize = +e.value.newValue;
+        // option.series[i].color = 
+    }
+    option.series.forEach(item => {
+        item.symbolSize = +e.value.newValue;
+        // 颜色改变
+        let data = e.itemStyle.color.match(/\d+(.\d+)*/g);
+        let s = parseFloat(data[1]) + 3 / item.symbolSize;
+        let l = parseFloat(data[2]) + 2 / item.symbolSize;
+        item.color = ``
+    });
+    // option.series[0].symbolSize = +e.value.newValue;
+    chartInfo.setOption(option); 
+    //获取旧值和新值
+    console.info(e.value.oldValue + '--' + e.value.newValue);
+});
+
+function colorAdd (oldValue, newValue, type) {
+    
+}
