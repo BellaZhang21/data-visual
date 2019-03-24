@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.bootcss.com/echarts/4.2.0-rc.2/echarts-en.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+  <title>bar</title>
+  <style>
+    .color{
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .main{
+      display: flex;
+    }
+    .re{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .block{
+      width: 200px;
+      height: 40px;
+      border: #ccc 1px solid;
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="part1">
+        <div id="main" style="width: 800px;height:600px;"></div>
+        <div class="color">
+          <button class="start">开始</button>
+          <button class="stop">结束</button>
+        </div>
+    </div>
+    <div class="re">
+      <div class="block pre"></div>
+      <div class="block next"></div>
+    </div>
+    
+  </div>
+</body>
+<script>
+  var myChart = echarts.init(document.getElementById('main'));
+  var option = {
+    title: {
+      text: 'Bar'
+    },
+    tooltip: {},
+    legend: {
+        data:['销量', '销售额']
+    },
+    xAxis: {
+        data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+    },
+    yAxis: {},
+    series: [{
+        name: '销量',
+        type: 'line',
+        data: [5, 20, 36, 10, 10, 20],
+        itemStyle: {
+          color: 'hsl(358.34, 59.67%, 47.64%)'
+        },
+        lineStyle: {
+          width: 3
+        }
+    }, {
+        name: '销售额',
+        type: 'line',
+        data: [6, 15, 26, 16, 19, 16],
+        itemStyle: {
+          color: 'hsl(204.67, 28.24%, 25.68%)'
+        },
+        lineStyle: {
+          width: 3
+        }
+    }]
+  };
+  myChart.setOption(option);
+  console.log('r to h:', rgbToHsl('2f4554'));
+
+  // hsl转rgb
+  function hslToRgb(h, s, l) {
+    let r, g, b;
+    let temp2;
+    if (+s === 0) {
+      r = l * 255.0;
+      g = l * 255.0;
+      b = l * 255.0;
+    } else {
+      temp2 = l < 0.5 ? l * (1.0+s) : temp2 = l+s-l*s;
+    }
+    let temp1 = 2.0*l-temp2;
+    h = 1 - (h / 360);
+    r = 255.0 * Hue2RGB(temp1, temp2, h + (1.0 / 3.0));
+    g = 255.0 * Hue2RGB(temp1, temp2, h);
+    b = 255.0 * Hue2RGB(temp1, temp2, h - (1.0 / 3.0));
+    return [r, g, b];
+  }
+
+  function Hue2RGB(v1, v2, vH)
+  {
+      if (vH < 0) vH += 1;
+      if (vH > 1) vH -= 1;
+      if (6.0 * vH < 1) return v1 + (v2 - v1) * 6.0 * vH;
+      if (2.0 * vH < 1) return v2;
+      if (3.0 * vH < 2) return v1 + (v2 - v1) * ((2.0 / 3.0) - vH) * 6.0;
+      return v1;
+  }
+
+  // rgb转hsl
+  function rgbToHsl(rgb) {
+      let r = parseInt(rgb.substring(0, 2), 16) / 255;
+      let g = parseInt(rgb.substring(2, 4), 16) / 255;
+      let b = parseInt(rgb.substring(4, 6), 16) / 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h, s, l = (max + min) / 2;
+
+      if (max == min){
+          h = s = 0; // achromatic
+      } else {
+          var d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch(max) {
+              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+              case g: h = (b - r) / d + 2; break;
+              case b: h = (r - g) / d + 4; break;
+          }
+          h /= 6;
+      }
+      h = 360 * (1-h);
+      return [h, s, l];
+  }
+
+  let ctrl;
+  $('.start').click(function(){
+    ctrl = setInterval(() => {
+      option.series.forEach(e => {
+        // 线的粗细
+        e.lineStyle.width += 0.4;
+         // 颜色变化
+        let data = e.itemStyle.color.match(/\d+(.\d+)*/g);
+        let s = parseFloat(data[1]) + 5 / e.lineStyle.width;
+        let l = parseFloat(data[2]) + 4 / e.lineStyle.width;
+        e.itemStyle.color = `hsl(${data[0]}, ${s}%, ${l}%)`
+      });
+      myChart.setOption(option);
+    }, 400);
+    
+  })
+
+  $('.stop').click(function() {
+    clearInterval(ctrl);
+    $('.pre').css('background-color', 'hsl(358.34, 59.67%, 47.64%)');
+    $('.next').css('background-color', option.series[0].itemStyle.color);
+    console.log(option.series[0].itemStyle.color);
+    console.log(option.series[0].lineStyle.width);
+
+  })
+
+</script>
+</html>
