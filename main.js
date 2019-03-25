@@ -1,6 +1,5 @@
 let wb;//读取完成的数据
 let rABS = false; //是否将文件读取为二进制字符串
-let data = [];  // 转为JSON的最终数据
 let xData = {
     data: [],
     type: 'category',
@@ -10,6 +9,7 @@ let yData = []; //  y轴数值
 let scatterData = [];
 let legend = [];
 let rawColor = [];  //  初始配色
+let currentState = '';
 
 function get_obj_first_value(data){
     for (var key in data)
@@ -111,7 +111,7 @@ function fixdata(data) { //文件流转BinaryString
 
 // echarts构建
 function createChart (type) {
-
+    currentState = type;
     let option = {
         title: {text: wb.SheetNames[0]},
         xAxis: xData,
@@ -167,7 +167,6 @@ function createChart (type) {
         e = e.replace('#', '');
         return rgbToHsl(e);
     });
-    console.log('raw', rawColor);
 }
 
 function rgbToHsl(rgb) {
@@ -191,7 +190,7 @@ function rgbToHsl(rgb) {
     }
     h = 360 * (1-h);
 
-    return `hsl(${h.toFixed(2)},${s.toFixed(2)},${l.toFixed(2)})`
+    return `hsl(${h.toFixed(2)},${(s*100).toFixed(2)}%,${(l*100).toFixed(2)}%)`
 }
 
 // 表格信息重现
@@ -245,25 +244,34 @@ $('#ex1').slider({
     //当值发生改变的时候触发
     let chartInfo = echarts.init(document.getElementById('scatter'));
     let option = chartInfo.getOption();
-    console.log(rawColor);
     for (let i = 0; i < option.series.length; i++) {
         option.series[i].symbolSize = +e.value.newValue;
         // option.series[i].color = 
     }
-    option.series.forEach(item => {
+    option.series.forEach((item, index) => {
         item.symbolSize = +e.value.newValue;
         // 颜色改变
-        let data = e.itemStyle.color.match(/\d+(.\d+)*/g);
-        let s = parseFloat(data[1]) + 3 / item.symbolSize;
-        let l = parseFloat(data[2]) + 2 / item.symbolSize;
-        item.color = ``
+        let data =(item.color || rawColor[index]).match(/\d+(.\d+)/g);
+        let s = colorAdd(e.value.oldValue, e.value.newValue, +data[1], 5);
+        let l = colorAdd(e.value.oldValue, e.value.newValue, +data[2], 3);
+        item.color = `hsl(${data[0]}, ${s}%, ${l}%)`
     });
     // option.series[0].symbolSize = +e.value.newValue;
     chartInfo.setOption(option); 
     //获取旧值和新值
-    console.info(e.value.oldValue + '--' + e.value.newValue);
 });
 
-function colorAdd (oldValue, newValue, type) {
+
+function colorAdd (oldValue, newValue, data, type) {
+    if (oldValue < newValue) {
+        for (let i = oldValue + 1; i <= newValue; i++) {
+            data += type / i;
+        }
+    } else {
+        for (let i = oldValue; i > newValue; i--) {
+            data -= type / i;
+        }
+    }
+    return data.toFixed(2);
     
 }

@@ -8,12 +8,12 @@
   <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
   <title>bar</title>
   <style>
-    .main{
+    /* .main{
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
-    }
+    } */
     .color{
       width: 100%;
       display: flex;
@@ -26,24 +26,24 @@
     <div class="part1">
         <div id="main" style="width: 600px;height:400px;"></div>
         <div class="color">
-          <input type="text" id="color">
+          <input type="text" id="width">
           <button class="change-color">确认</button>
           <button class="random-color">随机颜色</button>
         </div>
     </div>
-    <div class="part2">
+    <!-- <div class="part2">
         <div id="main2" style="width: 600px;height:400px;"></div>
         <div class="color">
           <input type="text" id="color">
           <button class="change-color">确认</button>
           <button class="random-color" >随机颜色</button>
         </div>
-    </div>
+    </div> -->
   </div>
 </body>
 <script>
   var myChart = echarts.init(document.getElementById('main'));
-  var myChart2 = echarts.init(document.getElementById('main2'));
+  // var myChart2 = echarts.init(document.getElementById('main2'));
   var option = {
     title: {
       text: 'Bar'
@@ -58,19 +58,21 @@
     yAxis: {},
     series: [{
         name: '销量',
-        type: 'bar',
+        type: 'line',
         data: [5, 20, 36, 10, 10, 20],
-        barWidth: '50%',
         itemStyle: {
-          color: '#668301'
-        }
+          color: '#add'
+        },
+        lineStyle: {}
     }]
   };
   myChart.setOption(option);
 
-  var option2 = option;
-  option2.series[0].itemStyle.color = '#441023';
-  myChart2.setOption(option2);
+  $('.change-color').click(function(){
+    width = $('#width').val();
+    option.series[0].lineStyle.width = width;
+    myChart.setOption(option);
+  })
 
 </script>
 </html>

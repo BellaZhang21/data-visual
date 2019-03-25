@@ -31,6 +31,7 @@
             <button type="button" class="btn btn-default" name="line">折线图</button>
             <button type="button" class="btn btn-default" name="scatter">散点图</button>
         </div>
+
         <div class="visual">
             <div id="scatter" class="chart">sc</div>
             <div id="line" class="chart">ll</div>
@@ -38,11 +39,22 @@
         </div>
         <div class="adjust">
             <div class="size">
-                <input  id="ex1" data-slider-id="ex1Slider" type="text"
+                图例大小调节：<input  id="ex1" data-slider-id="ex1Slider" type="text"
                     data-slider-min="5" data-slider-max="40" data-slider-step="1"
                     data-slider-value="10"/>
+                <div class="rawcolor color"></div>
+                <div class="newcolor color"></div>
             </div>
-            <div class="color"></div>
+            <div class="color">
+                配色方案选取：
+                <select class="form-control">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+            </div>
         </div>
         <table class="table table-bordered showTable">
             <tbody id="dataTable"></tbody>

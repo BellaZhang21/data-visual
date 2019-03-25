@@ -1,19 +1,41 @@
 .visual{
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 90%;
-  margin-left: 5%;
-  margin-top: 50px;
-  
+  justify-content: center;
+  margin-top: 20px;
 }
 .chart{
-  background: #ddd;
-  width: 30%;
-  height: 300px;
+  display: none;
+  width: 70%;
+  height: 500px;
 }
 .showTable{
-  width: 90%;
-  margin-left: 5%;
   margin-top: 50px;
+}
+.btn-set{
+  margin-top: 30px;
+}
+
+#ex1Slider .slider-selection {
+  background: #BABABA;
+}
+.color{
+  display: flex;
+  /* width: 400px; */
+}
+.size{
+  margin-right: 60px;
+}
+.adjust{
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+.form-control{
+  width: 100px;
+}
+.color-block{
+  width: 10px;
+  height: 10px;
+  background: red;
 }

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+  <title>Document</title>
+  <style>
+    #color{
+      width: 100px;
+      height: 20px;
+      border: 1px solid black;
+      background-color: hsl(240, 90%, 50%);
+    }
+  </style>
+</head>
+<body>
+  <button id="confirm">停止</button>
+  <div id="color"></div>
+</body>
+</html>
+<script>
+  $('#confirm').click(function(){
+    let data = $('.hsl').val().split(',');
+    console.log(hslToRgb(data[0], data[1], data[2]));
+    $('#result').text(data[0]+data[1]+data[2]);
+  })
+
+  console.log('rrrr', rgbToHsl(120,120,120));
+ 
+     
+</script>
